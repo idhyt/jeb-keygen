@@ -1,0 +1,141 @@
+/*
+ * Copyleft (c) 2014, 2025
+ * -----------------------------------------------------------------------
+ * Author   : quard@pediy
+ *          : wangshy@pediy
+ * Maintain : scz
+ * Version  : 1.5.201408040(full)
+ * Compile  : javac -g keygen.java
+ * Run      : java keygen
+ *          :
+ * Create   : 2014-04-23 17:01
+ * Modify   : 2015-07-25 17:00
+ * -----------------------------------------------------------------------
+ * The only thing they can't take from us are our minds. !H
+ */
+import java.io.*;
+import java.lang.Runtime;
+import java.util.Scanner;
+import java.nio.*;
+import java.security.*;
+import java.math.*;
+
+class keygen
+{
+    private static String License_GetSerialNumber ()
+    {
+        String          str1                = null;
+        Runtime         localRuntime        = Runtime.getRuntime();
+        Process         localProcess;
+
+        try
+        {
+            String[]    localObject1    = { "wmic", "bios", "get", "serialnumber" };
+
+            localProcess    = localRuntime.exec( localObject1 );
+        }
+        catch ( IOException localIOException1 )
+        {
+            return( null );
+        }
+
+        OutputStream    localOutputStream   = localProcess.getOutputStream();
+        InputStream     localInputStream    = localProcess.getInputStream();
+
+        try
+        {
+            localOutputStream.close();
+        }
+        catch ( IOException localIOException2 )
+        {
+            return( null );
+        }
+
+        Scanner         localObject1        = new Scanner( localInputStream );
+
+        try
+        {
+            String  str2    = "SerialNumber";
+
+            while ( localObject1.hasNext() )
+            {
+                String  str3    = localObject1.next();
+
+                if ( str2.equals( str3 ) )
+                {
+                    str1    = localObject1.next().trim();
+                    break;
+                }
+            }  /* end of while */
+            localObject1.close();
+        }
+        finally
+        {
+            localObject1.close();
+        }
+        return( str1 );
+    }  /* end of License_GetSerialNumber */
+
+    private static int License_sum ( int paramInt )
+    {
+        int i   = 0;
+
+        while ( paramInt > 0 )
+        {
+            i          += ( paramInt & 0xF );
+            paramInt  >>= 4;
+        }  /* end of while */
+        return( i % 10 );
+    }  /* end of License_sum */
+
+    private static long License_GetMachineId ( String SerialNumber )
+    {
+        try
+        {
+            MessageDigest   localMessageDigest  = MessageDigest.getInstance( "MD5" );
+
+            localMessageDigest.update( SerialNumber.getBytes() );
+
+            byte[]          arrayOfByte         = localMessageDigest.digest();
+            ByteBuffer      localByteBuffer     = ByteBuffer.wrap( arrayOfByte );
+
+            localByteBuffer.order( ByteOrder.LITTLE_ENDIAN );
+            return( localByteBuffer.getLong() & 0xFFFFFFFF );
+        }
+        catch ( NoSuchAlgorithmException localNoSuchAlgorithmException )
+        {
+            throw new RuntimeException( localNoSuchAlgorithmException );
+        }
+    }  /* end of License_GetMachineId */
+
+    private static long License_GetMachineId_2 ( long MachineId )
+    {
+        int         i   = ( int )( MachineId & 0xFFFFFFFF );
+        int         j   = ( int )( MachineId >> 32 & 0xFFFFFFFF );
+        int         n   = i + 376273029 + 287454020 & 0xFFFFFFFF;
+        int         i1  = j - 52416167 + 1432778632 & 0x7FFFFFFF;
+        ByteBuffer  buf = ByteBuffer.allocateDirect( 8 );
+
+        buf.putInt( i1 );
+        buf.putInt( n );
+        buf.rewind();
+        return( buf.getLong() );
+    }  /* end of License_GetMachineId_2 */
+
+    private static String License_GenerateKey ( long MachineId, long time )
+    {
+        long    l = License_GetMachineId_2( MachineId );
+        int     t = ( int )time ^ 0x56739ACD;
+        return String.format( "%dZ%d%d", l, t, License_sum( t ) );
+    }  /* end of License_GenerateKey */
+
+    public static void main ( String[] args )
+    {
+        String  SerialNumber    = License_GetSerialNumber();
+        long    MachineId       = License_GetMachineId( SerialNumber );
+        long    time            = System.currentTimeMillis() / 1000L + 86400 * 365 * 3 - 86400 * 13;
+
+        System.out.println("License key : " + License_GenerateKey( MachineId, time ) );
+        return;
+    }  /* end of main */
+}  /* end of class keygen */
