@@ -14,19 +14,27 @@
 ### Note Issue In Mac
 * `XstartOnFirstThread` : repleace old `JEB/64-bits/bin/swt.jar` to last release [swt-4.5-cocoa-macosx-x86_64](http://www.eclipse.org/swt/). or download directly [swt-4.5.2-cocoa-macosx-x86_64.zip](./jeb1.5/swt-4.5.2-cocoa-macosx-x86_64.zip)
 
-## JEB2.2
+## JEB2.2.7
 
-### JDK
+### JDK install
 
-* jdk 1.8.0_121
+jdk 1.8.0_121, [jdk all versions](https://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase8-2177648.html)
 
-[jdk all versions](https://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase8-2177648.html)
+### jenv install
 
-* JNI，BundleApp
+```
+brew install jenv
 
+jenv add /Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Home
+```
+
+### JNI，BundleApp
+
+```
 sudo cp /Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Info.plist /Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Info.plist.bak
 
 sudo vim /Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Info.plist
+```
 
 ```
 <key>JVMCapabilities</key>
@@ -38,15 +46,11 @@ sudo vim /Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Info.plist
 
 ```
 
+```
 sudo mkdir -p /Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Home/bundle/Libraries
 
 sudo ln -s /Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Home/jre/lib/server/libjvm.dylib /Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Home/bundle/Libraries/libserver.dylib
-
-* jenv
-
-brew install jenv
-
-jenv add /Library/Java/JavaVirtualMachines/jdk1.8.0_121.jdk/Contents/Home
+```
 
 ### Downloads
 
